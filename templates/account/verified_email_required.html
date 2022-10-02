@@ -1,0 +1,43 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+
+{% block content %}
+
+<!-- start contact form section -->
+<section class="wow fadeIn big-section" id="section-down">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-6 md-margin-30px-bottom wow fadeInLeft">
+                <div
+                    class="padding-fifteen-all bg-light-gray border-radius-6 lg-padding-seven-all sm-padding-30px-all h-100">
+                    <span class="text-extra-dark-gray alt-font text-large font-weight-600 margin-25px-bottom d-block">
+
+
+                        {% block head_title %}{% trans "Verify Your E-mail Address" %}{% endblock %}
+
+                    </span>
+
+                    {% url 'account_email' as email_url %}
+
+                    <p>{% blocktrans %}This part of the site requires us to verify that
+                        you are who you claim to be. For this purpose, we require that you
+                        verify ownership of your e-mail address. {% endblocktrans %}</p>
+
+                    <p>{% blocktrans %}We have sent an e-mail to you for
+                        verification. Please click on the link inside this e-mail. Please
+                        contact us if you do not receive it within a few minutes.{% endblocktrans %}</p>
+
+                    <p>{% blocktrans %}<strong>Note:</strong> you can still <a href="{{ email_url }}">change your e-mail
+                            address</a>.{% endblocktrans %}</p>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- end contact form section -->
+
+
+{% endblock %}

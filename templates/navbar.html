@@ -1,0 +1,101 @@
+  <style>
+      .verticalLine {
+        border-right: 1px solid #CFCFCF;
+        height: 35px;
+      }
+    </style>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light"  style="background-color: #e3f2fd;">
+  <img src="/static/logo.jpeg" width="180" height="60" alt="">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ml-auto">
+
+      {% if request.user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link" href="../admin/" ><b>Raporlar</b></a>
+        </li>
+
+        <div class="verticalLine"></div>
+
+        {% if request.user.profile.master %}
+        <li class="nav-item">
+          <a class="nav-link" href="../globalrapor/"><b>Global Raporlar</b></a>
+        </li>
+        <div class="verticalLine"></div>
+        {% endif %}
+
+        <li class="nav-item">
+          <a class="nav-link" href="/sahalistesi/" ><b>Saha Listesi</b></a>
+        </li>
+
+        <div class="verticalLine"></div>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'envanter' %}" ><b>Saha Envanteri</b></a>
+        </li>
+
+        <div class="verticalLine"></div>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'parcakodu' %}" ><b>Parça Kodu Listesi</b></a>
+        </li>
+
+        <div class="verticalLine"></div>
+
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'envanter_tarihcesi' %}" ><b>Envanter Tarihçesi</b></a>
+        </li>
+
+        <div class="verticalLine"></div>
+
+      {% if request.user.profile.kontrolcu %}
+
+        <li class="nav-item">
+          <a class="nav-link" href="/kontrolRaporlar/" ><b>Kontrol Raporu</b></a>
+        </li>
+
+        <div class="verticalLine"></div>
+
+      {% endif %}
+
+
+        {% if request.user.profile.denetci%}
+          <li class="nav-item">
+            <a class="nav-link" href="/bakimRapor"><b>Denetim Raporu</b></a>
+          </li>
+
+      {% elif request.user.profile.bakimci %}
+
+          <li class="nav-item">
+            <a class="nav-link" href="/bakimRapor"><b>Sayım Raporu</b></a>
+          </li>
+        {% endif %}
+
+
+      <div class="verticalLine"></div>
+
+        <li class="nav-item; border=1px">
+            <a class="nav-link" href="/logout"><img src="/static/out.jpg" width="23" height="23" alt=""><small> Çıkış Yap </small></a>
+        </li>
+      <div class="verticalLine"></div>
+
+          <li class="nav-item ; border=1px">
+            <a class="nav-link" href=""><img src="/static/human.jpg" width="23" height="23" alt=""><small> Hoş geldiniz, {{request.user}} </small></a>
+          </li>
+
+      {% else %}
+
+          <div class="verticalLine"></div>
+          <li class="nav-item">
+            <a class="nav-link" href="/login"><img src="/static/in.png" width="23" height="23" alt=""><small> Giriş Yap </small></a>
+          </li>
+          <div class="verticalLine"></div>
+
+      {% endif %}
+
+    </ul>
+  </div>
+</nav>

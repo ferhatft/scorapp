@@ -1,0 +1,511 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load i18n %}
+
+{% block body %}
+
+<style>
+  /* bakım_raport.html */
+.dataTables_length select {
+  width: 50px !important;
+}
+.table {
+  width: 100% !important;
+}
+
+.button {
+  background-color: #4caf50; /* Green */
+  border: 1;
+  color: black;
+  /* <!--  padding: 15px 32px;--> */
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 18px;
+  /* <!--  margin: 4px 2px;--> */
+  cursor: pointer;
+}
+
+.button2 {
+  background-color: #e8e8e8;
+} /* Blue */
+.button3 {
+  background-color: #f44336;
+} /* Red */
+.button4 {
+  background-color: #e7e7e7;
+  color: black;
+} /* Gray */
+.button5 {
+  background-color: #555555;
+} /* Black */
+
+.navbar-light .navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 0.5%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+} */
+
+/* bakım_raport.html */
+
+</style>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light" style="background-color: #e3f2fd;">
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav ml-auto">
+          <form class="form-inline mr-auto" method="GET">
+            <input type="text" name="rapor_id" value="" placeholder="Rapor ID'sını Giriniz" class="form-control mr-2">
+            <button class="btn btn-outline-dark mr-5"><b>Raporu Getir</b></button>
+          </form>
+          <form class="form-inline mr-5" method="POST" action="{% url 'bakimRaporOlustur' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+
+              {% if request.user.profile.denetci %}
+              <input type="file" class="form-control" id="customFile" name="excelFile" />
+              {% endif %}
+              <input type="text" class="form-control ml-2" id="envanter_saha_no" name="envanter_saha_no" placeholder="Saha No/ID Giriniz" />
+              <button class="btn btn-outline-dark ml-2"><b>Rapor Çalıştır</b></button>
+          </form>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="modal" id="satir_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Satır Ekle</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <input type="hidden" id="saha_no_hidden" value="{{ rapor.saha_no }}">
+            <input type="hidden" id="saha_kod_hidden" value="{{ rapor.saha_kodu }}">
+            <input type="hidden" id="department_code_hidden" value="{{ rapor.department_code }}">
+            <div class="form-group">
+              <label for="ekipman_seri_no" class="col-form-label">Ekipman Seri No:</label>
+              <input type="text" class="form-control" id="ekipman_seri_no">
+            </div>
+            <div class="form-group">
+              <label for="ekipman_parca_kodu" class="col-form-label">Ekipman Parça Kodu:</label>
+              <input class="form-control" id="ekipman_parca_kodu"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="parca_tanimi" class="col-form-label">Parça Tanımı:</label>
+              <textarea class="form-control" id="parca_tanimi"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="parca_tanimi" class="col-form-label">Sayım:</label>
+              <input class="form-control" id="sayim" value="1">
+            </div>
+            <div class="form-group">
+              <label for="parca_tanimi" class="col-form-label">Açıklama:</label>
+              <input class="form-control" id="aciklama" value="Eklendi">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="satir_ekle_modal_btn" data-dismiss="modal">Satır Ekle</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Çıkış</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="modal_mail_" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Email Gönderiniz</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="form-group">
+              <label for="message-text" class="col-form-label">Mesaj:</label>
+              <textarea class="form-control" id="mail_body"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="mail_gonder" data-dismiss="modal">Mail Gönder</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Çıkış</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="save_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">İşlem Başarılı!</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>Tüm Veriler Başarıyla Kaydedildi!</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
+            </div>
+      </div>
+  </div>
+  </div>
+
+  <div class="modal" id="mail_modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">İşlem Başarılı!</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Rapor Başarıyla İlgili Emaillere Gönderildi!</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+  </div>
+  <div class="modal" id="onay_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">İşlem Başarılı!</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Rapor Başarıyla Onaylandı!</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-dark" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if bakim_envanter %}
+
+    <div class="container-fluid mt-3">
+
+      <div class="row">
+
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false"><b>Bakım Envanter</b></a>
+          </li>
+
+          <li class="nav-item">
+              <a class="nav-link" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true"><b>Sayım Sonuç Raporu </b></a>
+          </li>
+        </ul>
+
+
+        <div class="tab-content" id="myTabContent">
+
+          <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+            <div style="overflow-x:scroll" class="col-md-12">
+
+                      <input type="hidden" value="{{rapor_id}}" id="rapor_id_hidden">
+
+                      <div class="mb-1 mt-0 p-4">
+                          <div class="div d-flex">
+                              <button class="button button2 mr-auto">{{rapor.saha_no}} - {{rapor.saha_kod}} - {{rapor.department_code}} - RID : {{rapor_id}}</button> <button class="btn btn-outline-dark ml-2" id="satir_ekle">Satır Ekle</button> <button type="button" id="satir_sil" class="btn btn-outline-dark ml-2"> Satır Sil</button><button type="button" class="btn btn-outline-dark ml-2" placeholder="" aria-controls="dt-basic_2" id="save_all_2">Kaydet</button> <form action="{% url 'sayimSonucRaporuOlustur' %}" method="POST" style="display:inline"><input type="hidden" value="{{rapor_id}}" name="rapor_id"><button class="btn btn-outline-dark ml-2" id="sonuc_rapor_olustur" type="submit">Raporu Güncelle</button></form>
+                              <!-- bakım_raporu.html sayfasına eklenecek -->
+                              <a href="{% url 'resim_ekle' rapor.pk %}" class="btn btn-outline-dark ml-2"  target="blank">Resim Sayfası</a>
+                              <!-- resim_ekle.html adında bir dosya -->
+                          </div>
+                      </div>
+
+                      <br>
+
+                      <table id="dt-basic_2" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                          <thead>
+                            <tr>
+                              <!--<th class="th-sm">Ekle</th>-->
+                              <th class="th-sm">Seri No</th>
+                              <th class="th-sm">Parça Kodu</th>
+                              <th class="th-sm">Parça Tanımı</th>
+                              <th class="th-sm">Quantity</th>
+                              <th class="th-sm">Sayım</th>
+                              <th class="th-sm">Açıklama</th>
+                            </tr>
+                          </thead>
+                          <tbody class="tbody_2">
+
+                              {% for girdi in bakim_envanter %}
+
+                                  <tr data-satir_id={{ girdi.id }}>
+
+                                  {% if girdi.ekipman_seri_no == "nan" %}
+                                      <td> &nbsp; </td>
+                                  {% else %}
+                                    <td>
+                                      {%if girdi.image %}
+                                          <a href="{{girdi.image.url}}", src="{{girdi.ekipman_seri_no}}", title="{{girdi.ekipman_seri_no}}", target="_blank">{{girdi.ekipman_seri_no}}</a>
+                                      {% else %}
+                                          {{girdi.ekipman_seri_no}}
+                                      {% endif %}
+                                      </td>
+                                  {% endif %}
+                                      <td>{{girdi.ekipman_parca_kodu}}</td>
+                                      <td>{{girdi.parca_tanimi}}</td>
+                                      <td>{{girdi.quantity}}</td>
+                                      <td><input class="form-control envanter_girdi_sayim" value="{{girdi.sayim}}"></td>
+                                      <td><input class="form-control envanter_girdi_aciklama" value="{{girdi.aciklama}}" id="{{girdi.id}}"></td>
+                                  </tr>
+                              {% endfor %}
+                          </tbody>
+
+                      </table>
+            </div>
+          </div>
+
+          <div class="tab-pane fade active" id="home" role="tabpanel" aria-labelledby="home-tab">
+
+            <div class="col-md-12">
+
+                      <input type="hidden" value="{{rapor_id}}" id="rapor_id_hidden">
+                      <div class="mb-1 mt-0">
+                          <div class="div d-flex">
+                              <button class="button button2 mr-auto">{{rapor.saha_no}} - {{rapor.saha_kod}} - {{rapor.department_code}} - RID: {{rapor_id}}</button> <button type="button" class="btn btn-outline-dark ml-2" placeholder="" aria-controls="dt-basic" id="save_all">Kaydet</button><button class="btn btn-outline-dark ml-2" id="email_gonder">Mail Gönder</button>
+                          </div>
+                      </div>
+                      <br>
+                      <table id="dt-basic" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                          <thead>
+                            <tr>
+                              <th class="th-sm">1-
+                              </th>
+                              <th class="th-sm">2-
+                              </th>
+                              <th class="th-sm">3-
+                              </th>
+                              <th class="th-sm">4-
+                              </th>
+                              <th class="th-sm">5-
+                              </th>
+                              <th class="th-sm">6-
+                              </th>
+                              <th class="th-sm">Ref Grup
+                              </th>
+                              <th class="th-sm">Sonuc
+                              </th>
+                              <th class="th-sm">Kategori</th>
+                              <th class="th-sm">Sorgu No</th>
+                              <th class="th-sm">Açıklama</th>
+                              <!--<th class="th-sm">Kaydet</th>-->
+                            </tr>
+                          </thead>
+                          <tbody class="tbody">
+
+                              {% for girdi in sayim_sonuc_girdiler %}
+
+                            {% if girdi.sonuc == "Uyumsuz" %}
+                              <tr style="color:#EE3B3B">
+                            {% else %}
+                              <tr>
+                            {% endif %}
+                              <td>{{girdi.ref_1}}</td>
+                              <td>{{girdi.ref_2}}</td>
+                              <td>{{girdi.ref_3}}</td>
+                              <td>{{girdi.ref_4}}</td>
+                              <td>{{girdi.ref_5}}</td>
+                              <td>{{girdi.ref_6}}</td>
+                              <td>{{girdi.ref_grup}}</td>
+                              <td>{{girdi.sonuc}}</td>
+                              <td>{{girdi.kategori}}</td>
+                              <td>{{girdi.sorgu_no}}</td>
+                              <td><input class="form-control girdi_aciklama" value="{{girdi.aciklama}}" id="{{girdi.id}}"></td>
+                              <!--<td><button type="button" class="btn btn-outline-dark save" data-id="{{girdi.id}}">Save</button></td>-->
+                            </tr>
+
+            {% endfor %}
+                          </tbody>
+                      </table>
+            </div>
+            
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+
+    var table1 = $('#dt-basic').DataTable( {
+    "paging":   false,
+    "ordering": true,
+    "info":     false
+    } );
+
+    var table2 = $("#dt-basic_2").DataTable( {
+    "paging":   false,
+    "ordering": true,
+    "info":     false,
+    createdRow: function (row, data, index) {
+    //
+    // if the second column cell is blank apply special formatting
+    //
+    if (data.length == 7){
+    console.log("deneme")
+    var satir_id_ = data[6]
+    row.dataset.satir_id = satir_id_
+    }
+
+    //$(row).data("satir_id", satir_id_)
+    }
+    } );
+
+
+    $('.tbody').on( 'click', 'tr', function () {
+          $(this).toggleClass('selected');
+      } );
+
+
+      $('.tbody_2').on( 'click', 'tr', function () {
+          $(this).toggleClass('selected');
+      } );
+
+          $("#save_all").click(function(){
+              var len = $(".girdi_aciklama").length
+              var index = 0
+              $(".girdi_aciklama").each(function(el){
+              var aciklama = $(this).val()
+              var girdi_id = $(this).attr("id")
+              $.get("/updateAciklama?girdi_id=" + girdi_id + "&aciklama=" + aciklama, (res) => {
+
+                  index = index + 1
+                  if(len == index){
+                  $("#save_modal").modal("toggle")
+                  }
+              })
+              })
+          })
+
+          $("#save_all_2").click(function(){
+            var len = $(".envanter_girdi_aciklama").length
+              var index = 0
+
+              $(".envanter_girdi_aciklama").each(function(el){
+              var sayim = $(".envanter_girdi_sayim")[el].value
+              var aciklama = $(this).val()
+              var girdi_id = $(this).attr("id")
+              $.get("/scorsayimupdate?girdi_id=" + girdi_id + "&sayim=" + sayim + "&aciklama=" + aciklama, (res) => {
+
+                  index = index + 1
+                  if(len == index){
+                  $("#save_modal").modal("toggle")
+                  $("#sonuc_rapor_olustur").prop("disabled", false)
+                  }
+              })
+              })
+          })
+
+      $("#email_gonder").css("display", "inline-block")
+      $("#rapor_onayla").css("display", "inline-block")
+
+
+      $("#rapor_onayla").click(() => {
+        var rapor_id = $("#rapor_id_hidden").val()
+        console.log(rapor_id)
+        $.get("/raporOnayla/?rapor_id=" + rapor_id, (res, text)=>{
+          if(res.Msg == "Success"){
+            $("#onay_modal").modal("toggle")
+          }
+        })
+      })
+
+      $("#email_gonder").click(() =>{
+        $("#modal_mail_").modal("toggle")
+      })
+      $("#mail_gonder").click(() => {
+            var rapor_id = $("#rapor_id_hidden").val()
+            var mail_body = $("#mail_body").val()
+
+            $.post("/kontroleGonder/", {"rapor_id":rapor_id, "mail_body":mail_body}, (res, text) =>{
+              if(res.Msg == "Success"){
+                $("#mail_modal").modal("toggle")
+              }
+            })
+          })
+
+          $("#satir_ekle").click(() => {
+        $("#satir_modal").modal("toggle")
+
+      })
+      $("#satir_ekle_modal_btn").click(() => {
+        var rapor_id = $("#rapor_id_hidden").val()
+        var saha_no = $("#saha_no_hidden").val()
+        var saha_kod = $("#saha_kod_hidden").val()
+        var department_code = $("#department_code_hidden").val()
+        var ekipman_parca_kodu = $("#ekipman_parca_kodu").val()
+        var parca_tanimi = $("#parca_tanimi").val()
+        var ekipman_seri_no = $("#ekipman_seri_no").val()
+        var sayim = $("#sayim").val()
+        var aciklama = $("#aciklama").val()
+        $.post("/satirEkle/", {"rapor_id":rapor_id, "saha_no":saha_no, "saha_kod":saha_kod, "department_code":department_code, "ekipman_parca_kodu":ekipman_parca_kodu, "ekipman_seri_no":ekipman_seri_no, "parca_tanimi":parca_tanimi, "sayim":sayim, "aciklama":aciklama}, (res)=>{
+
+            $("#satir_modal input").slice(3).each(function(el){console.log($(this).val(""))})
+            $("#satir_modal textarea").val("")
+            $("#satir_eklendi_modal").modal("toggle")
+            var satir_id = res.satir_id
+
+            table2.row.add([
+              ekipman_seri_no,
+              ekipman_parca_kodu,
+              parca_tanimi,
+              0,
+              '<input class="form-control envanter_girdi_sayim" value="' + sayim + '">',
+              '<input class="form-control envanter_girdi_aciklama" value="' + aciklama + '" id="' + satir_id + '"></td>',
+              satir_id
+            ]).draw()
+            //$(".tbody_2").prepend(res)
+            //table2.draw()
+        })
+      })
+
+      $("#satir_sil").click(() => {
+          var nodes_length = table2.rows(".selected").nodes().length
+          var index = 0;
+          table2.rows(".selected").nodes().each((elem, index) => {
+              var satir_id = elem.getAttribute("data-satir_id")
+              $.get("/satirSil/?satir_id=" + satir_id, (res, text) => {
+                  index++;
+                  table2.row($(elem)).remove().draw()
+                  if(index == nodes_length){
+                      window.alert("Seçili Satırlar Silindi!")
+                  }
+              })
+          })
+      })
+
+  </script>
+
+
+  {% else %}
+
+
+  <div align="center">
+    <br><br><br><br><br><br><br>
+    <h2> Raporu Çalıştırın </h2>
+  </div>
+
+  {% endif %}
+
+{% endblock body %}
+
+  

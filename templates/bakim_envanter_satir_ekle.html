@@ -1,0 +1,19 @@
+<tr data-satir_id="{{satir.id}}">
+  <td>
+    {% if satir.ekipman_seri_no == "nan" %} {% else %} {{satir.ekipman_seri_no}}
+    {% endif %}
+  </td>
+  <td>{{satir.ekipman_parca_kodu}}</td>
+  <td>{{satir.parca_tanimi}}</td>
+  <td>{{satir.quantity}}</td>
+  <td>
+    <input class="form-control envanter_girdi_sayim" value="{{satir.sayim}}" />
+  </td>
+  <td>
+    <input
+      class="form-control envanter_girdi_aciklama"
+      value="{{satir.aciklama}}"
+      id="{{satir.id}}"
+    />
+  </td>
+</tr>

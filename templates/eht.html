@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load i18n %}
+
+
+    
+{% block title %}
+<title>Envanter Tarihçesi | Scor</title>
+{% endblock title %}
+    
+{% block body %}
+
+<style>
+.dataTables_length select{
+    width:50px!important
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 95%;
+  font-size: 14px;
+  margin: auto;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+.div {
+  margin: auto;
+  width: 95%;
+  text-align: right;
+
+}
+
+.button {
+  background-color: #4CAF50; /* Green */
+  border: 1;
+  color: black;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.open_tab{
+  display:none;
+}
+.popup{
+  width: 80%;
+  min-height: 400px;
+  max-height: 750px;
+  display: flex;
+  flex-direction: column;
+  background-color: #EEE8AA;
+  position: fixed;
+  top: 15%;
+  left: 10%;
+  z-index: 10;
+  border: 1;
+  overflow: auto;
+  display:none;
+}
+
+.cross{
+  width: 100%;
+  text-align: right;
+
+}
+.table{
+  width: 100%;
+  padding: 10px 20px;
+}
+
+</style>
+
+<div class="popup">
+  <div class="cross">
+    <span style="font-size:20px; cursor:pointer;"> &cross; </span>
+  </div>
+  <div class="table">
+    <table class="scor_table">
+      <tr>
+        <th class="th-sm">Saha No</th>
+        <th class="th-sm">Saha Kodu</th>
+        <th class="th-sm">1-</th>
+        <th class="th-sm">2-</th>
+        <th class="th-sm">3-</th>
+        <th class="th-sm">4-</th>
+        <th class="th-sm">5-</th>
+        <th class="th-sm">6-</th>
+        <th class="th-sm">Ref Grup</th>
+        <th class="th-sm">Sonuc</th>
+        <th class="th-sm">Kategori</th>
+        <th class="th-sm">Sorgu No</th>
+      </tr>
+    </table>
+  </div>
+</div>
+<div class="div">
+<nav class="navbar navbar-expand-lg navbar-light bg-light" style="background-color: #e3f2fd;">
+  <div class="collapse navbar-collapse" id="navbarNavDropdown">
+    {% if request.user.profile.kontrolcu %}
+    <ul class="navbar-nav mr-auto">
+      <form class="form-inline" method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+        <input type="file" class="form-control" id="customFile" name="EHT_EnvanterFile" />
+        <button class="btn btn-secondary ml-2" name="seri"><b>Seri EHT Yükle</b></button>
+        <button class="btn btn-primary ml-2" name="sarf"><b>Sarf EHT Yükle</b></button>
+      </form>
+    </ul>
+    {% endif%}
+    <ul>
+    {% if request.user.profile.kontrolcu %}
+    <button class="btn btn-outline-dark mr-5" id="add_to_score"><b>Scor Çalıştır</b></button>
+    <button class="open_tab"> Scor Aç </button>
+    {% endif %}
+    </ul>
+    <ul class="navbar-nav ml-auto">
+        <form class="form-inline mr-auto" method="POST">
+          {% csrf_token %}
+          <input type="text" name="saha_no" value="" placeholder="Saha ID Giriniz" class="form-control mr-2">
+          <button class="btn btn-outline-dark mr-5"><b>Saha EHT Getir</b></button>
+        </form>
+    </ul>
+  </div>
+
+</nav>
+
+<div class="row">
+  {% if last_update %}
+  <div class="div text-left">
+    <div class="col">
+      <span class="label label-info">Güncelleme Tarihi : {{last_update}}</span> 
+    </div>
+  </div>
+  {% endif %}
+</div>
+<table id="dt-basic">
+  <thead class="thead-light">
+    <tr>
+ <th style="cursor: pointer;" class="select_all" data-select="off">Seç</th>
+      <!--th>İşlem No</th-->
+      <th class="th-sm">Saha ID</th>
+      <th class="th-sm">Seri No</th>
+      <th class="th-sm">Parça Kodu</th>
+      <th class="th-sm">Parça Tanimi</th>
+      <th class="th-sm">Miktar</th>
+      <th class="th-sm">Birim</th>
+      <th class="th-sm">Kaynak Yeri</th>
+      <th class="th-sm">Kullanici</th>
+      <!--th>İslem Tipi</th-->
+      <th class="th-sm">İşlem_Tarih</th>
+
+      <th class="th-sm">İE No</th>
+
+  </tr>
+  </thead>
+  <tbody class="tbody" id="myTable">
+    {% for envanter in saha_eht_envanter %}
+    <!--tr class="tr"-->
+            {% if envanter.islem_miktari < 0 %}
+            <tr class="tr" style="color:#EE3B3B">
+            {% else %}
+            <tr class="tr">
+            {% endif %}
+
+        <td class="check">
+            <input type="checkbox" value="{{envanter.id}}" class="checkbox" data-hedef_lokasyon="{{envanter.hedef_lokasyon}}" data-parca_kodu="{{envanter.parca_kodu}}" data-islem_miktari="{{envanter.islem_miktari}}" >
+        </td>
+        <!--td class="show-popup" role="button"> {{envanter.islem_no}} </td-->
+        <td class="th-sm"> {{envanter.hedef_lokasyon}}</td>
+        <td class="th-sm"> {{envanter.seri_no}} </td>
+        <td class="th-sm"> {{envanter.parca_kodu}} </td>
+        <td class="th-sm"> {{envanter.parca_tanimi}} </td>
+        <td class="th-sm"> {{envanter.islem_miktari}} </td>
+        <td class="th-sm"> {{envanter.olcum_birimi}} </td>
+        <td class="th-sm"> {{envanter.kaynak_yeri}} </td>
+        <td class="th-sm"> {{envanter.kullanici_adi}} </td>
+        <!--td> {{envanter.islem_tipi}} </td-->
+        <td class="th-sm"> {{envanter.islem_tarihi}} </td>
+        {% if envanter.form_no == "nan" %}
+            <td class="th-sm"> &nbsp; </td>
+        {% else %}
+            <td class="th-sm"> {{envanter.form_no}} </td>
+        {% endif %}
+
+    </tr>
+{% endfor %}
+  </tbody>
+</table>
+</div>
+
+<script>
+$(document).ready(function(){
+  $("#myInput").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#myTable tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+
+        var table1 = $('#dt-basic').DataTable( {
+        "paging":   false,
+        "ordering": true,
+        "info":     true
+    } );
+
+        var table2 = $("#dt-basic_2").DataTable( {
+        "paging":   false,
+        "ordering": true,
+        "info":     false,
+        createdRow: function (row, data, index) {
+        //
+        // if the second column cell is blank apply special formatting
+        //
+        if (data.length == 7){
+          console.log("deneme")
+        var satir_id_ = data[6]
+        row.dataset.satir_id = satir_id_
+        }
+
+        //$(row).data("satir_id", satir_id_)
+    }
+    } );
+
+    $('.tbody').on( 'click', 'tr', function () {
+        $(this).toggleClass('selected');
+    } );
+
+  var checkboxes = document.getElementsByClassName("checkbox");
+  var button_scor = document.getElementById("add_to_score");
+  var checkeds = []
+  button_scor.addEventListener("click",()=>{
+    for (const element of checkboxes){
+      if (element.checked){
+        checkeds.push(element)
+      }
+    }
+    let obj_list = create_object(checkeds);
+    checkeds = [];
+
+    send_scor(obj_list);
+    document.querySelector(".open_tab").style.display="inline";
+
+  })
+
+
+  function create_object(elements){
+    obj_list = []
+    for (const element of elements){
+      obj = {}
+      let hedef_lokasyon = element.getAttribute("data-hedef_lokasyon");
+      let parca_kodu = element.getAttribute("data-parca_kodu");
+      let islem_miktari = element.getAttribute("data-islem_miktari");
+      obj["hedef_lokasyon"] = hedef_lokasyon;
+      obj["parca_kodu"] = parca_kodu;
+      obj["islem_miktari"] = islem_miktari;
+      obj_list.push(obj);
+    }
+    return obj_list;
+  }
+
+  function send_scor(obj_list){
+    fetch("send-scor/",{
+      method:"POST",
+      body:JSON.stringify({
+        'object_list':obj_list
+      }),
+    })
+    .then(response => response.json())
+    .then(data =>{
+      place_score(data);
+      document.querySelector(".popup").style.display="flex";
+    })
+  }
+
+  function place_score(data){
+      remove_childs(document.querySelector(".scor_table"));
+
+    for (let dt of data){
+      let tr =document.createElement("tr");
+      let saha_no = document.createElement("td");
+      saha_no.innerText = `${dt.saha_no}`;
+      let saha_kod = document.createElement("td");
+      saha_kod.innerText = `${dt.saha_kod}`;
+      let ref1 = document.createElement("td");
+      ref1.innerText = `${dt.ref_1}`;
+      let ref2 = document.createElement("td");
+      ref2.innerText = `${dt.ref_2}`;
+      let ref3 = document.createElement("td");
+      ref3.innerText = `${dt.ref_3}`;
+      let ref4 = document.createElement("td");
+      ref4.innerText = `${dt.ref_4}`;
+      let ref5 = document.createElement("td");
+      ref5.innerText = `${dt.ref_5}`;
+      let ref6 = document.createElement("td");
+      ref6.innerText = `${dt.ref_6}`;
+      let ref_grup = document.createElement("td");
+      ref_grup.innerText = `${dt.ref_grup}`;
+      let sonuc = document.createElement("td");
+      sonuc.innerText = `${dt.sonuc}`;
+      let kontrol = document.createElement("td");
+      kontrol.innerText = `${dt.kontrol}`;
+      let sorgu_no = document.createElement("td");
+      sorgu_no.innerText = `${dt.sorgu_no}`;
+
+      tr.appendChild(saha_no);
+      tr.appendChild(saha_kod);
+      tr.appendChild(ref1);
+      tr.appendChild(ref2);
+      tr.appendChild(ref3);
+      tr.appendChild(ref4);
+      tr.appendChild(ref5);
+      tr.appendChild(ref6);
+      tr.appendChild(ref_grup);
+      tr.appendChild(sonuc);
+      tr.appendChild(kontrol);
+      tr.appendChild(sorgu_no);
+
+      document.querySelector(".scor_table").appendChild(tr);
+
+    }
+
+  }
+  document.querySelector(".cross").addEventListener("click",()=>{
+    document.querySelector(".popup").style.display = "none";
+  })
+
+  document.querySelector(".open_tab").addEventListener("click",()=>{
+    document.querySelector(".popup").style.display = "flex";
+  })
+
+    let select_all_button = document.querySelector(".select_all");
+    select_all_button.addEventListener("click",()=>{
+      let collections = document.getElementsByClassName("checkbox")
+
+      if (select_all_button.getAttribute("data-select") =="off"){
+        select_all_button.setAttribute("data-select","on");
+        for (let col of collections){
+          col.checked = true;
+        }
+      }else{
+        select_all_button.setAttribute("data-select","off");
+        for (let col of collections){
+          col.checked = false;
+        }
+      }
+      console.log(select_all_button.getAttribute("data-select"));
+    })
+
+    function remove_childs(parent){
+        child = parent.lastElemenetChild;
+        while(child){
+            parent.removeChild(child);
+            child = parent.lastElementChild;
+        }
+    }
+
+</script>
+
+
+{% endblock body %}

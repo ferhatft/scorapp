@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load i18n %}
+
+    
+{% block title %}
+<title>Global Rapor | Scor</title>
+{% endblock title %}
+    
+{% block body %}
+
+
+<style>
+.dataTables_length select{
+    width:50px!important
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 95%;
+  font-size: 14px;
+  margin: auto;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+.div {
+  margin: auto;
+  width: 95%;
+  text-align: right;
+
+}
+
+.button {
+  background-color: #4CAF50; /* Green */
+  border: 1;
+  color: black;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+</style>
+
+<div class="div">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light" style="background-color: #e3f2fd;">
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+
+            <form method="POST"">
+              {% csrf_token %}
+              <input type="submit" class="btn btn-info add" name="globalrun" title="Global Raporu Güncelle">
+            </form>
+
+            <ul class="navbar-nav ml-auto">
+              <form class="form-inline mr-auto" method="POST"">
+                {% csrf_token %}
+                <input type="text" name="saha_no" value="" placeholder="Saha No/ID Giriniz" class="form-control mr-2">
+                <button class="btn btn-outline-dark mr-5"><b>Saha Global Raporunu Getir</b></button>
+              </form>
+            </ul>
+          </div>
+      </nav>
+
+      <br>
+
+  <div class="col-md-12">
+
+            <div class="mb-1 mt-0">
+                <div class="div d-flex">
+                    <button type="button" class="btn btn-outline-dark ml-2" placeholder="" aria-controls="dt-basic" id="save_all">Kaydet</button>
+                </div>
+            </div>
+            <br>
+            <table id="dt-basic" class="table table-striped table-bordered" cellspacing="0" width="100%">
+                <thead>
+                  <tr>
+                    <th class="th-sm">Saha No</th>
+                    <th class="th-sm">Saha Kodu</th>
+                    <th class="th-sm">1-</th>
+                    <th class="th-sm">2-</th>
+                    <th class="th-sm">3-</th>
+                    <th class="th-sm">4-</th>
+                    <th class="th-sm">5-</th>
+                    <th class="th-sm">6-</th>
+                    <th class="th-sm">Ref Grup</th>
+                    <th class="th-sm">Sonuc</th>
+                    <th class="th-sm">Kategori</th>
+                    <th class="th-sm">Sorgu No</th>
+                    <th class="th-sm">Bölge</th>
+                    <th class="th-sm">Tarih</th>
+                    <th class="th-sm">Açıklama</th>
+                  </tr>
+                </thead>
+                <tbody class="tbody">
+
+                    {% for girdi in saha_envater %}
+
+                  {% if girdi.sonuc == "Uyumsuz" %}
+                    <tr style="color:#EE3B3B">
+                  {% else %}
+                    <tr>
+                  {% endif %}
+                    <td>{{girdi.saha_no}}</td>
+                    <td>{{girdi.saha_kod}}</td>
+                    <td>{{girdi.ref_1}}</td>
+                    <td>{{girdi.ref_2}}</td>
+                    <td>{{girdi.ref_3}}</td>
+                    <td>{{girdi.ref_4}}</td>
+                    <td>{{girdi.ref_5}}</td>
+                    <td>{{girdi.ref_6}}</td>
+                    <td>{{girdi.ref_grup}}</td>
+                    <td>{{girdi.sonuc}}</td>
+                    <td>{{girdi.kategori}}</td>
+                    <td>{{girdi.sorgu_no}}</td>
+                    <td>{{girdi.department_code}}</td>
+                    <td>{{girdi.created_at}}</td>
+                    <td><input class="form-control girdi_aciklama" value="{{girdi.aciklama}}" id="{{girdi.id}}"></td>
+                  </tr>
+
+{% endfor %}
+                </tbody>
+
+              </table>
+              </div>
+
+<script>
+    var table1 = $('#dt-basic').DataTable( {
+    "paging":   false,
+    "ordering": true,
+    "info":     false
+} );
+    var table2 = $("#dt-basic_2").DataTable( {
+    "paging":   false,
+    "ordering": true,
+    "info":     false,
+    createdRow: function (row, data, index) {
+    //
+    // if the second column cell is blank apply special formatting
+    //
+    if (data.length == 7){
+      console.log("deneme")
+    var satir_id_ = data[6]
+    row.dataset.satir_id = satir_id_
+    }
+
+    //$(row).data("satir_id", satir_id_)
+}
+} );
+    $('.tbody').on( 'click', 'tr', function () {
+            $(this).toggleClass('selected');
+        } );
+
+
+    $('.tbody_2').on( 'click', 'tr', function () {
+        $(this).toggleClass('selected');
+    } );
+
+    $("#save_all").click(function(){
+        var len = $(".girdi_aciklama").length
+        var index = 0
+        $(".girdi_aciklama").each(function(el){
+        var aciklama = $(this).val()
+        var girdi_id = $(this).attr("id")
+        $.get("/updateAciklama?girdi_id=" + girdi_id + "&aciklama=" + aciklama, (res) => {
+
+            index = index + 1
+            if(len == index){
+            $("#save_modal").modal("toggle")
+            }
+        })
+        })
+    })
+
+    $("#save_all_2").click(function(){
+        var len = $(".envanter_girdi_aciklama").length
+        var index = 0
+
+        $(".envanter_girdi_aciklama").each(function(el){
+        var sayim = $(".envanter_girdi_sayim")[el].value
+        var aciklama = $(this).val()
+        var girdi_id = $(this).attr("id")
+        $.get("/scorsayimupdate?girdi_id=" + girdi_id + "&sayim=" + sayim + "&aciklama=" + aciklama, (res) => {
+
+            index = index + 1
+            if(len == index){
+            $("#save_modal").modal("toggle")
+            $("#sonuc_rapor_olustur").prop("disabled", false)
+            }
+        })
+        })
+    })
+
+    $("#email_gonder").css("display", "inline-block")
+    $("#rapor_onayla").css("display", "inline-block")
+
+
+    $("#rapor_onayla").click(() => {
+      var rapor_id = $("#rapor_id_hidden").val()
+      console.log(rapor_id)
+      $.get("/raporOnayla/?rapor_id=" + rapor_id, (res, text)=>{
+        if(res.Msg == "Success"){
+          $("#onay_modal").modal("toggle")
+        }
+      })
+    })
+
+    $("#email_gonder").click(() =>{
+      $("#modal_mail_").modal("toggle")
+    })
+    $("#mail_gonder").click(() => {
+          var rapor_id = $("#rapor_id_hidden").val()
+          var mail_body = $("#mail_body").val()
+
+          $.post("/kontroleGonder/", {"rapor_id":rapor_id, "mail_body":mail_body}, (res, text) =>{
+            if(res.Msg == "Success"){
+              $("#mail_modal").modal("toggle")
+            }
+          })
+        })
+
+        $("#satir_ekle").click(() => {
+      $("#satir_modal").modal("toggle")
+
+    })
+    $("#satir_ekle_modal_btn").click(() => {
+      var rapor_id = $("#rapor_id_hidden").val()
+      var saha_no = $("#saha_no_hidden").val()
+      var saha_kod = $("#saha_kod_hidden").val()
+      var department_code = $("#department_code_hidden").val()
+      var ekipman_parca_kodu = $("#ekipman_parca_kodu").val()
+      var parca_tanimi = $("#parca_tanimi").val()
+      var ekipman_seri_no = $("#ekipman_seri_no").val()
+      var sayim = $("#sayim").val()
+      var aciklama = $("#aciklama").val()
+      $.post("/satirEkle/", {"rapor_id":rapor_id, "saha_no":saha_no, "saha_kod":saha_kod, "department_code":department_code, "ekipman_parca_kodu":ekipman_parca_kodu, "ekipman_seri_no":ekipman_seri_no, "parca_tanimi":parca_tanimi, "sayim":sayim, "aciklama":aciklama}, (res)=>{
+
+          $("#satir_modal input").slice(3).each(function(el){console.log($(this).val(""))})
+          $("#satir_modal textarea").val("")
+          $("#satir_eklendi_modal").modal("toggle")
+          var satir_id = res.satir_id
+
+          table2.row.add([
+            ekipman_seri_no,
+            ekipman_parca_kodu,
+            parca_tanimi,
+            0,
+            '<input class="form-control envanter_girdi_sayim" value="' + sayim + '">',
+            '<input class="form-control envanter_girdi_aciklama" value="' + aciklama + '" id="' + satir_id + '"></td>',
+            satir_id
+          ]).draw()
+          //$(".tbody_2").prepend(res)
+          //table2.draw()
+      })
+    })
+    $("#satir_sil").click(() => {
+        var nodes_length = table2.rows(".selected").nodes().length
+        var index = 0;
+        table2.rows(".selected").nodes().each((elem, index) => {
+            var satir_id = elem.getAttribute("data-satir_id")
+            $.get("/satirSil/?satir_id=" + satir_id, (res, text) => {
+                index++;
+                table2.row($(elem)).remove().draw()
+                if(index == nodes_length){
+                    window.alert("Seçili Satırlar Silindi!")
+                }
+            })
+        })
+    })
+</script>
+
+
+{% endblock body %}

@@ -1,0 +1,25 @@
+{% for girdi in sayim_sonuc_girdiler %}
+
+<tr>
+  <td>{{girdi.saha_no}} - {{girdi.saha_kod}}</td>
+  <td>{{girdi.ref_1}}</td>
+  <td>{{girdi.ref_2}}</td>
+  <td>{{girdi.ref_3}}</td>
+  <td>{{girdi.ref_4}}</td>
+  <td>{{girdi.ref_5}}</td>
+  <td>{{girdi.ref_6}}</td>
+  <td>{{girdi.ref_grup}}</td>
+  <td>{{girdi.sonuc}}</td>
+  <td>{{girdi.kategori}}</td>
+  <td>{{girdi.sorgu_no}}</td>
+  <td>
+    <input
+      class="form-control girdi_aciklama"
+      value="{{girdi.aciklama}}"
+      id="{{girdi.id}}"
+    />
+  </td>
+  <!--<td><button type="button" class="btn btn-outline-dark save" data-id="{{girdi.id}}">Save</button></td>-->
+</tr>
+
+{% endfor %}

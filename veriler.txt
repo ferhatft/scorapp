@@ -1,0 +1,14 @@
+connection yolu = "../db.sqlite3"
+tablo isimleri = RaporGirdiler, HamVeri, RaporReferanslari
+
+
+Tablo Kolonları:
+
+HamVeri: id, saha_no, saha_kodu, saha_tipi, ana_yer_tipi, ekipman_seri_no, ekipman_parca_kodu, parca_tanimi, quantity
+
+RaporGirdiler:id, saha_no, saha_kod, ref_1, ref_2, ref_3, ref_4, ref_5, ref_6, ref_grup, sonuc, kontrol, kategori, sorgu_no, aciklama
+
+RaporReferanslari:id, sorgu_no, ref, ekipman_parca_kodu, parca_tanimi, grup_tanimi, rapor_tanimi, ref_grup, kategori, analiz_no
+
+
+

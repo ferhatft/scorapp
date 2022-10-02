@@ -1,0 +1,59 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+{% load account %}
+
+
+
+{% block content %}
+
+
+
+
+<!-- start contact form section -->
+<section class="wow fadeIn big-section" id="section-down">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-6 md-margin-30px-bottom wow fadeInLeft">
+                <div
+                    class="padding-fifteen-all bg-light-gray border-radius-6 lg-padding-seven-all sm-padding-30px-all h-100">
+                    <span class="text-extra-dark-gray alt-font text-large font-weight-600 margin-25px-bottom d-block">
+
+
+                        {% block head_title %}{% trans "Confirm E-mail Address" %}{% endblock %}
+
+                    </span>
+
+                    {% if confirmation %}
+
+                    {% user_display confirmation.email_address.user as user_display %}
+
+                    <p>{% blocktrans with confirmation.email_address.email as email %}Please confirm that <a
+                            href="mailto:{{ email }}">{{ email }}</a> is an e-mail address for user
+                        {{ user_display }}.{% endblocktrans %}
+                    </p>
+
+                    <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+                        {% csrf_token %}
+                        <button type="submit">{% trans 'Confirm' %}</button>
+                    </form>
+
+                    {% else %}
+
+                    {% url 'account_email' as email_url %}
+
+                    <p>{% blocktrans %}This e-mail confirmation link expired or is invalid. Please <a
+                            href="{{ email_url }}">issue a new
+                            e-mail confirmation request</a>.{% endblocktrans %}</p>
+
+                    {% endif %}
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- end contact form section -->
+
+{% endblock %}

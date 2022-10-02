@@ -1,0 +1,8 @@
+{% for rapor in data %}
+<option value="{{rapor.id}}">
+  Kontrol Rapor Id:{{rapor.id}} - Saha No: {{rapor.saha_no}} - Oluşturulma
+  Tarihi: {{ rapor.created_at|timesince }} - Kontrol Edilen Rapor
+  Id:{{rapor.child.id}} | {% if rapor.onay %} Onaylı {% else %} Onaylı Değil {%
+  endif %}
+</option>
+{% endfor %}

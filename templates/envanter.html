@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load i18n %}
+
+    
+{% block title %}
+<title>Saha Envanteri | Scor</title>
+{% endblock title %}
+    
+{% block body %}
+
+
+<style>
+.dataTables_length select{
+    width:50px!important
+}
+
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 95%;
+  font-size: 14px;
+  margin: auto;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+.div {
+  margin: auto;
+  width: 95%;
+  text-align: right;
+
+}
+
+.button {
+  background-color: #4CAF50; /* Green */
+  border: 1;
+  color: black;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+</style>
+
+<div class="div">
+  <nav class="navbar navbar-expand-lg navbar-light bg-light" style="background-color: #e3f2fd;">
+      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+
+          <form method="POST" enctype="multipart/form-data" class="export">
+            {% csrf_token %}
+            <input type="submit" value="Excel Export" class="btn btn-info add" name="export" title="Saha Envanterini Excel'e alır">
+            <input type="hidden" name="saha_num" value="{{saha_no}}">
+          </form>
+
+          <ul class="navbar-nav ml-auto">
+            <form class="form-inline mr-auto" method="POST" action="{% url 'envanter' %}">
+              {% csrf_token %}
+              <input type="text" name="saha_no" value="" placeholder="Saha No Giriniz" class="form-control mr-2">
+              <button class="btn btn-outline-dark mr-5"><b>Saha Envanter Getir</b></button>
+            </form>
+
+          </ul>
+      </div>
+  </nav>
+
+
+  <!--
+  <div class="div">
+  <div class="div">
+    <input id="myInput" type="text" placeholder=" Arama.. ">
+  </div>
+  -->
+
+  <br>
+
+  <table id="dt-basic" >
+    <thead class="thead-light">
+      <tr>
+    <!--     <th style="cursor: pointer;" class="select_all">Seçim Yap</th> -->
+        <th>Saha No</th>
+        <th>Saha ID</th>
+        <th>Saha Tipi</th>
+        <th>Seri No</th>
+        <th>Parça Kodu</th>
+        <th>Parça Tanimi</th>
+        <th>Tarihi</th>
+        <th>Bölge</th>
+        <th>Adet/Miktar</th>
+        <th>Üst Ekipman</th>
+    </tr>
+    </thead>
+    <tbody class="tbody" id="myTable">
+      {% for envanter in saha_envater %}
+        <tr>
+          <td> {{envanter.saha_no}}</td>
+          <td> {{envanter.saha_kodu}} </td>
+          <td> {{envanter.saha_tipi}} </td>
+
+          {% if envanter.ekipman_seri_no == "nan" %}
+              <td> &nbsp; </td>
+              {% else %}
+              <td> {{envanter.ekipman_seri_no}} </td>
+          {% endif %}
+
+          <td> {{envanter.ekipman_parca_kodu}} </td>
+          <td> {{envanter.parca_tanimi}} </td>
+          {% if envanter.kurulumu_tarihi == "NaT" %}
+              <td> &nbsp; </td>
+          {% else %}
+              <td> {{envanter.kurulumu_tarihi}} </td>
+          {% endif %}
+          <td> {{envanter.department_code}} </td>
+          <td> {{envanter.quantity}} </td>
+          {% if envanter.ustekipman == "nan" %}
+              <td> &nbsp; </td>
+          {% else %}
+              <td> {{envanter.ustekipman}} </td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+$(document).ready(function(){
+  $("#myInput").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#myTable tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
+
+        var table1 = $('#dt-basic').DataTable( {
+        "paging":   false,
+        "ordering": true,
+        "info":     true
+    } );
+
+        var table2 = $("#dt-basic_2").DataTable( {
+        "paging":   false,
+        "ordering": true,
+        "info":     false,
+        createdRow: function (row, data, index) {
+        //
+        // if the second column cell is blank apply special formatting
+        //
+        if (data.length == 7){
+          console.log("deneme")
+        var satir_id_ = data[6]
+        row.dataset.satir_id = satir_id_
+        }
+
+        //$(row).data("satir_id", satir_id_)
+    }
+    } );
+
+    $('.tbody').on( 'click', 'tr', function () {
+        $(this).toggleClass('selected');
+    } );
+
+
+
+</script>
+
+
+{% endblock body %}

@@ -1,0 +1,39 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Sign Out" %}{% endblock %}
+
+{% block content %}
+
+<!-- start contact form section -->
+<section class="wow fadeIn big-section" id="section-down">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-6 md-margin-30px-bottom wow fadeInLeft">
+        <div class="padding-fifteen-all bg-light-gray border-radius-6 lg-padding-seven-all sm-padding-30px-all h-100">
+          <span class="text-extra-dark-gray alt-font text-large font-weight-600 margin-25px-bottom d-block">
+            <h1>{% trans "Sign Out" %}</h1>
+
+            <p>{% trans 'Are you sure you want to sign out?' %}</p>
+          </span>
+          <form id="contact-form" method="post" action="{% url 'account_logout' %}">
+            {% csrf_token %}
+
+            <div>
+              {% if redirect_field_value %}
+              <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+              {% endif %}
+              <button id="contact-us-button" type="submit" class="btn btn-small border-radius-4 btn-dark-gray">Sign
+                Out</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% include "account/includes/letsplan.html" %}
+    </div>
+  </div>
+</section>
+<!-- end contact form section -->
+
+{% endblock %}

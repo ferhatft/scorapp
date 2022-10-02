@@ -1,0 +1,31 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+
+
+{% block content %}
+
+
+
+<!-- start contact form section -->
+<section class="wow fadeIn big-section" id="section-down">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-6 md-margin-30px-bottom wow fadeInLeft">
+                <div
+                    class="padding-fifteen-all bg-light-gray border-radius-6 lg-padding-seven-all sm-padding-30px-all h-100">
+                    <span class="text-extra-dark-gray alt-font text-large font-weight-600 margin-25px-bottom d-block">
+
+                        {% block head_title %}{% trans "Sign Up Closed" %}{% endblock %}
+
+                    </span>
+
+                    <p>{% trans "We are sorry, but the sign up is currently closed." %}</p>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
