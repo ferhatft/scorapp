@@ -1,50 +1,20 @@
-# shopzon
-an Ecommerce website using Django,DRF,channels,websocket and celery.
+# Scor Rapor Uygulaması
 
+Bu Django tabanlı proje, bakım raporları oluşturmayı ve yönetmeyi amaçlamaktadır. Ayrıca kullanıcı yetkilendirme, kullanıcı kaydı, şifre sıfırlama gibi temel kullanıcı yönetimi işlevlerini de içerir.
 
-## How to clone and run:
->go to directory where you want to clone and run this command:
-  ```sh
-  git clone https://github.com/aadil611/shopzon.git; cd shopzon
-  ```
-		
->create virtual env:
-  ```sh
-  python -m venv env
-  ```
-		
->activate virtual env:
+## Özellikler
 
- ```sh
-  source env/bin/activate
-  ```
-		
->update pip:
+- Kullanıcı kaydı oluşturma ve oturum açma işlevleri.
+- Bakım raporlarını oluşturma, düzenleme ve onaylama yetenekleri.
+- Parça kodu görüntüleme ve envanter listesi gibi envanter yönetimi işlevleri.
+- Raporların e-posta ile gönderilmesi özelliği.
+- Raporların görüntülenmesi ve düzenlenmesi için özel izinler.
 
- ```sh
- pip install -U pip
- ```
-		
->install requirements:
-  ```sh
-  pip install -r requirements.txt
-  ```
-  
-  >enter email and password in .env file in given format:
-  ```sh
-  EMAIL = 'email'
-  PASSWORD = 'password'
-  ```
-- for this you have to create an app password for your gmail account.
-  
-  ```sh
-  open gmail -> manage your account -> security -> app passwords
-  ```
-  > before creating app password activate 2-step verification
-  
-  
- >now run these commands in different terminals:
- ```sh
-  python manage.py runserver
-  celery -A shopzon.celery worker -l info
-  ```
+## Başlarken
+
+1. Projeyi bilgisayarınıza klonlayın.
+2. Sanal bir ortam oluşturun ve bağımlılıkları yüklemek için `pip install -r requirements.txt` komutunu çalıştırın.
+3. Veritabanını oluşturmak için `python manage.py migrate` komutunu çalıştırın.
+4. Yönetici kullanıcı oluşturmak için `python manage.py createsuperuser` komutunu çalıştırın.
+5. Sunucuyu başlatmak için `python manage.py runserver` komutunu çalıştırın.
+6. Tarayıcınızda `http://localhost:8000` adresine giderek uygulamayı görüntüleyebilirsiniz.
